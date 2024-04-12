@@ -1,8 +1,8 @@
 {
   "name": "mentoring-with-typescript-express",
   "version": "1.0.0",
-  "description": "Mentoring junior developers with TypeScript/Express",
   "main": "index.js",
+  "description": "node js api",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -10,7 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/sheriffwoody0922/mentoring-with-TypeScript-Express.git"
   },
-  "author": "",
+  "author": "CodeWarrior",
   "license": "ISC",
   "dependencies": {
     "connect-mongo": "^4.4.1",
