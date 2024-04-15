@@ -146,29 +146,29 @@ router.delete("/:orderId", (req, res, next) => {
 	const id = req.params.orderId;
 	// also we can use remove
   Order.deleteOne({ _id: id })
-		.exec() // .exec() method return promise
-		.then((docs) => {
-			if (docs) {
-        res.status(200).send({
-					message: "Successfully deleted the order",
-					request: {
-						type: "Post",
-						description: "You can post new order",
-						url: "http://localhost:3000/orders/",
-						data: {
-							quantity: "number",
-							product: "mongoose.Types.ObjectId",
-						},
-					},
-				});
-			}
-		})
-    .catch((error) => {
-			console.log(error);
-			// 500 Internal Server Error
-			res.status(500).send({
-				message: "Internal Server Error(invalid id)",
-				error: error,
-			});
-		});
+  .exec() // .exec() method return promise
+  .then((docs) => {
+    if (docs) {
+      res.status(200).send({
+        message: "Successfully deleted the order",
+        request: {
+          type: "Post",
+          description: "You can post new order",
+          url: "http://localhost:3000/orders/",
+          data: {
+            quantity: "number",
+            product: "mongoose.Types.ObjectId",
+          },
+        },
+      });
+    }
+  })
+  .catch((error) => {
+    console.log(error);
+    // 500 Internal Server Error
+    res.status(500).send({
+      message: "Internal Server Error(invalid id)",
+      error: error,
+    });
+  });
 });
