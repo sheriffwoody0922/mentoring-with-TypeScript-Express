@@ -12,18 +12,27 @@ router.get("/", (req, res, next) => {
 	Product.find()
 	.exec() // .exec() method return promise
 	.then((doc) => {
-		if (doc.length > 0) {
-			res.status(200).send({
-				product: doc,
-				message: "Successful Found all product",
-			});
-		} else {
-			//  if no product found in db return null
-			res.status(404).send({
-				product: doc,
-				message: "no product is found in db",
-			});
+		// pass more information  with response
+		const responseObject = {
+			count: docs.length,
+			products: docs.map((doc) => {
+				return {
+					name: doc.name,
+					price: doc.price,
+					_id: doc._id,
+					request: {
+						type: "Get",
+						description: "Get one product with the id",
+						url: "http://localhost:3000/products/" + doc._id,
+					},
+				};
+			}),
 		}
+
+		res.status(200).send({
+			result: responseObject,
+			message: "Successful Found all product",
+		});
 	})
 	.catch((error) => {
 		console.log(error);
@@ -46,11 +55,20 @@ router.post("/", (req, res, next) => {
 	product
 	.save()
 	.then((result) => {
-		console.log(result);
-		res.status(200).send({
-			message: "item saved to database",
-			message: "Handling Post Request to /products",
-			CreatedProduct: product,
+		// HTTP Status 201 indicates that as a result of HTTP POST  request,
+		//  one or more new resources have been successfully created on server
+		res.status(201).send({
+			message: "Created Product Successfully",
+			CreatedProduct: {
+				name: result.name,
+				price: result.price,
+				_id: result._id,
+				request: {
+					type: "Get",
+					description: "Get one product with the id",
+					url: "http://localhost:3000/products/" + result._id,
+				},
+			},
 		});
 	})
 	.catch((error) => {
@@ -67,13 +85,24 @@ router.post("/", (req, res, next) => {
 router.get("/:productId", (req, res, next) => {
 	const id = req.params.productId;
 	Product.findById(id)
+	.select("name price _id")
 	.exec() // .exec() method return promise
 	.then((doc) => {
 		console.log(doc);
 		if (doc) {
 			res.status(200).send({
 				product: doc,
-				message: "Successful Found the product",
+				message: "Successfully Found the product",
+				products: {
+					name: docs.name,
+					price: docs.price,
+					_id: docs._id,
+					request: {
+						type: "Get",
+						description: "Get all the products",
+						url: "http://localhost:3000/products/",
+					},
+				},
 			});
 		} else {
 			// if the id is not found in db it return null
@@ -117,7 +146,13 @@ router.patch("/:productId", (req, res, next) => {
 		if (doc) {
 			res.status(200).send({
 				message: "product is been Updated",
-				id: id,
+				UpdateProduct: updateOperation,
+				_id: id,
+				request: {
+					type: "Get",
+					description: "Get one product with the id",
+					url: "http://localhost:3000/products/" + id,
+				},
 			});
 		}
 	})
@@ -141,8 +176,13 @@ router.delete("/:productId", (req, res, next) => {
 			console.log(doc);
 			if (doc) {
 				res.status(200).send({
-					message: "Deleted product",
-					id: id,
+					message: "Successfully deleted the product",
+					request: {
+						type: "Post",
+						description: "You can post new Product",
+						url: "http://localhost:3000/products/",
+						data: { name: "string", price: "Number" },
+					},
 				});
 			}
 		})
