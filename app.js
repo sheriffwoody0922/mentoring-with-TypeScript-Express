@@ -14,11 +14,11 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const productRoutes = require("./routes/products");
-const orderRoutes = require("./routes/orders");
+const orderRoutes = require("./routes/order");
 
 // Access Environment variables
-const MONGO_USER = process.env.MONGO_USER;
-const MONGO_PASSWORD = process.env.MONGO_PASSWORD;
+// const MONGO_USER = process.env.MONGO_USER;
+// const MONGO_PASSWORD = process.env.MONGO_PASSWORD;
 const MONGO_DB_NAME = process.env.MONGO_DB_NAME;
 
 // Connect mongoose to MongoDB  Database.

@@ -5,7 +5,7 @@ const router = express.Router();
 const mongoose = require("mongoose");
 
 const Order = require("../models/order");
-const Product = require("../models/products");
+const Product = require("../models/product");
 
 // Handling Get Request to /orders
 router.get("/", (req, res, next) => {
@@ -172,3 +172,6 @@ router.delete("/:orderId", (req, res, next) => {
     });
   });
 });
+
+module.exports = router;
+
