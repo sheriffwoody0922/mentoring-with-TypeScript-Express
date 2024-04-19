@@ -13,7 +13,7 @@ const orderSchema = mongoose.Schema({
   product: {
 		type: mongoose.Types.ObjectId,
 		ref: "Product",
-		required: true,
+		required: [true, "Please provide name to order"],
 	},
   quantity: {
 		type: Number,
@@ -23,4 +23,4 @@ const orderSchema = mongoose.Schema({
 
 // Export model
 // Compile model from order
-module.exports = mongoose.model("Order", orderSchema);
+module.exports = mongoose.models.Order || mongoose.model("Order", orderSchema);

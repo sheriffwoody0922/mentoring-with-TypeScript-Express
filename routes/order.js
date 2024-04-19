@@ -4,9 +4,9 @@ const express = require("express");
 const router = express.Router();
 
 // Import Middleware function to authenticate token From different file
-const authenticateToken = require("../auths/auth");
+const authenticateToken = require("../middleware/auth/auth");
 
-const ordersController = require("../controllers/orders");
+const ordersController = require("../controllers/orders.controller");
 
 // Handling Get Request to /orders
 router.get("/", authenticateToken, ordersController.orders_get_all);

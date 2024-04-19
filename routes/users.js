@@ -4,7 +4,7 @@ const express = require("express");
 const router = express.Router();
 
 // Import Middleware function to authenticate token From different file
-const authenticateToken = require("../auths/auth");
+const authenticateToken = require("../middleware/auth/auth");
 
 // Handling /User(login)
 router.post("/login", userController.user_login);

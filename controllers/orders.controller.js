@@ -1,36 +1,38 @@
 const mongoose = require("mongoose");
 
-const Order = require("../models/order");
-const Product = require("../models/product");
+const Order = require("../models/order.model");
+const Product = require("../models/product.model");
 
 // Handling Get Request to /orders
 exports.orders_get_all = (req, res, next) => {
 	// find all the orders
 	Order.find()
 		.select("quantity product _id")
+		.populate("product", "name") // populate return merge result
 		.exec() // .exec() method return promise
 		.then((docs) => {
 			// pass more information  with response
 			const responseObject = {
 				count: docs.length,
 				orders: docs.map((doc) => {
-					console.log(doc.product);
 					return {
-						quantity: doc.name,
-						product: doc.product,
 						_id: doc._id,
+						quantity: doc.quantity,
+						product: doc.product,
 						request: {
 							type: "Get",
 							description: "Get one order with the id",
-							url: "http://localhost:3000/orders/" + doc._id,
+							url: `${process.env.WEBSITE_URL}/api/${process.env.API_VERSION}/orders/${doc._id}`,
 						},
 					};
 				}),
 			};
 
-			res.status(200).send({
+			return res.status(200).send({
+				success: true,
+				message: "Successful Found all orders",
+				status: 200,
 				result: responseObject,
-				message: "Successful Found all product",
 			});
 		})
 		.catch((error) => {
@@ -47,13 +49,15 @@ exports.orders_create_order = (req, res, next) => {
 	Product.findById(req.body.productId)
 		.exec()
 		.then((product) => {
-			console.log(10);
 			// if product is null
 			if (product === null) {
 				return res.status(404).send({
-					message: "Product is not found",
+					message: "Product is not found to be ordered",
+					status: 404,
+					success: false,
 				});
 			}
+
 			// create new order
 			const order = new Order({
 				_id: new mongoose.Types.ObjectId(),
@@ -69,6 +73,8 @@ exports.orders_create_order = (req, res, next) => {
 					//  one or more new resources have been successfully created on server
 					res.status(201).send({
 						message: "Order Successfully Stored",
+						success: true,
+						status: 201,
 						CreatedOrderObject: {
 							quantity: result.quantity,
 							product: product,
@@ -76,7 +82,7 @@ exports.orders_create_order = (req, res, next) => {
 							request: {
 								type: "Get",
 								description: "Get one order with the id",
-								url: "http://localhost:3000/orders/" + result._id,
+								url: `${process.env.WEBSITE_URL}/api/${process.env.API_VERSION}/orders/${result._id}`,
 							},
 						},
 					});
@@ -85,14 +91,18 @@ exports.orders_create_order = (req, res, next) => {
 					// 500 Internal Server Error
 					res.status(500).send({
 						message: "unable to save to database",
+						success: false,
+						status: 500,
 						error: error,
 					});
 				});
 		})
 		.catch((error) => {
 			res.status(404).send({
-				message: "Product by given id not found",
+				message: "Product by given id not found to be ordered",
 				error: error,
+				status: 404,
+				success: false,
 			});
 		});
 };
@@ -102,13 +112,13 @@ exports.orders_get_one_order = (req, res, next) => {
 	const id = req.params.orderId;
 
 	Order.findById(id)
-		.populate("product")
+		.populate("product") // populate all product information
 		.select("name price _id")
 		.exec() // .exec() method return promise
 		.then((docs) => {
 			if (docs) {
 				res.status(200).send({
-					message: "Successfully Found the order",
+					message: "Successfully Found the order by given id",
 					order: {
 						quantity: docs.quantity,
 						product: docs.product,
@@ -116,15 +126,16 @@ exports.orders_get_one_order = (req, res, next) => {
 						request: {
 							type: "Get",
 							description: "Get all the order",
-							url: "http://localhost:3000/orders/",
+							url: `${process.env.WEBSITE_URL}/api/${process.env.API_VERSION}/products`,
 						},
 					},
 				});
 			} else {
 				// if the id is not found in db it return null
 				res.status(404).send({
-					product: doc,
 					message: "no valid entry found for provided ID",
+					success: false,
+					status: 400,
 				});
 			}
 		})
@@ -132,12 +143,14 @@ exports.orders_get_one_order = (req, res, next) => {
 			// 500 Internal Server Error
 			res.status(500).send({
 				message: "Internal Server Error(invalid id)",
+				success: false,
+				status: 500,
 				error: error,
 			});
 		});
 };
 
-// Handling deleting individual order
+// Handling deleting individual order/ID
 exports.orders_delete_order = (req, res, next) => {
 	const id = req.params.orderId;
 	// also we can use remove
@@ -150,7 +163,7 @@ exports.orders_delete_order = (req, res, next) => {
 					request: {
 						type: "Post",
 						description: "You can post new order",
-						url: "http://localhost:3000/orders/",
+						url: `${process.env.WEBSITE_URL}/api/${process.env.API_VERSION}/orders`,
 						data: {
 							quantity: "number",
 							product: "mongoose.Types.ObjectId",
@@ -160,10 +173,11 @@ exports.orders_delete_order = (req, res, next) => {
 			}
 		})
 		.catch((error) => {
-			console.log(error);
 			// 500 Internal Server Error
 			res.status(500).send({
 				message: "Internal Server Error(invalid id)",
+				success: false,
+				status: 500,
 				error: error,
 			});
 		});
