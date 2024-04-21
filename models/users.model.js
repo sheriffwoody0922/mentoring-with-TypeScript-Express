@@ -22,15 +22,16 @@ const userSchema = mongoose.Schema({
 		minlength: 3,
 	},
   email: {
-		type: String,
-		required: [true, "Please provide email"],
-		unique: true,
+    type: String,
+    required: [true, "Please provide email"],
     // a regular expression to validate an email address(stackoverflow)
     match: [
-      /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/,
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
       "Please provide a valid email",
-    ]
-    },
+    ],
+    unique: true,
+    trim: true,
+  },
   password: {
 		type: String,
 		required: true,
@@ -68,6 +69,8 @@ const userSchema = mongoose.Schema({
 			},
     ]
   }
+}, {
+  timestamps: true,
 });
 
 // Pre Save Hook. Generate hashed password
@@ -98,6 +101,34 @@ userSchema.methods.comparePassword = async function (canditatePassword) {
   const isMatch = await bcrypt.compare(canditatePassword, this.password);
 	return isMatch;
 };
+
+// add to cart
+userSchema.methods.addToCart = function (product) {
+  const cartProductIndex = this.cart.items.findIndex((cp) => {
+		return cp.productId.toString() === product._id.toString();
+	});
+  let newQuantity = 1;
+	const updatedCartItems = [...this.cart.items];
+
+  if (cartProductIndex >= 0) {
+		newQuantity = this.cart.items[cartProductIndex].quantity + 1;
+		updatedCartItems[cartProductIndex].quantity = newQuantity;
+	} else {
+    updatedCartItems.push({
+			productId: product._id,
+			quantity: newQuantity,
+		});
+	}
+
+  const updatedCart = {
+		items: updatedCartItems,
+	};
+  
+	this.cart = updatedCart;
+	return this.save();
+};
+
+
 
 // Export Model
 // Compile model from userSchema
