@@ -46,8 +46,8 @@ const userSchema = mongoose.Schema({
 		maxLength: 40,
 	},
   dateOfBirth: {
-		type: Number,
-		maxLength: 5,
+		type: String,
+		maxLength: 15,
 	},
   gender: { type: String },
   joinedDate: {
@@ -68,9 +68,7 @@ const userSchema = mongoose.Schema({
 				},
 			},
     ]
-  }
-}, 
-{
+  },
 	role: {
 		type: String,
 		enum: ["user", "guide", "admin"],
