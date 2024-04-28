@@ -1,5 +1,3 @@
-/** @format */
-
 // Import the mongoose module from node_modules
 const mongoose = require("mongoose");
 
@@ -18,6 +16,7 @@ const orderSchema = mongoose.Schema({
   quantity: {
 		type: Number,
 		default: 1,
+		trim: true,
 	},
 });
 

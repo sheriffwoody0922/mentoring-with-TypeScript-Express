@@ -1,5 +1,3 @@
-/** @format */
-
 // Import the mongoose module from node_modules
 const mongoose = require("mongoose");
 
@@ -9,15 +7,19 @@ const productSchema = mongoose.Schema({
 	_id: mongoose.Schema.Types.ObjectId,
 	name: {
 		type: String,
-		required: [true, "Please provide name"]
+		required: [true, "Please provide name"],
+		trim: true,
+    lowercase: true,
 	},
 	price: {
 		type: Number,
-		required: [true, "Please provide price"]
+		required: [true, "Please provide price"],
+		trim: true,
 	},
 	productImage: {
 		type: String,
-		required: [true, "Please provide product image"]
+		required: [true, "Please provide product image"],
+		trim: true,
 	},
 	addedDate: {
 		type: Date,
