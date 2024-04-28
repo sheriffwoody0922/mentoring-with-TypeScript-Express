@@ -1,9 +1,15 @@
-const { handleServerSideErrors } = require('../errors/handleServerSideErrors');
 
 const paginatedResults = (model) => {
   return async (req, res, next) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
+    const sort = { }
+
+    if (!req.query.sortBy && req.query.OrderBy) {
+      sort[req.query.sortBy] = req.query.OrderBy.toLowerCase() === 'desc' ? -1 : 1;
+    } else {
+      sort.createdAt = -1  
+    }
 
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
@@ -37,16 +43,17 @@ const paginatedResults = (model) => {
 
     try {
       results.results = await model
-      .find()
+      .find(query)
       .select(' firstName lastName email dateOfBirth gender cart createdAt updatedAt 	role')
       .limit(limit)
+      .sort({ addedDate: -1 })
       .skip(startIndex)
       .exec();
 
       // Add paginated Results to the request
       res.paginatedResults = results;
     } catch (error) {
-      handleServerSideErrors();
+      next(error);
     }
   }
 }

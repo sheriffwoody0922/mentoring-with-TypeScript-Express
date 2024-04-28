@@ -46,4 +46,7 @@ router.post(
   userController.user_signup
 );
 
+// API Endpoint for Handling delete Request to /api/v1/admin/users/userId (Protected route)
+router.delete('/users/:userId',  isAuth, isAdmin,  userController.user_delete);
+
 module.exports = router;

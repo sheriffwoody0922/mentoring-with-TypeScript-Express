@@ -40,7 +40,8 @@ const sendEmail = (userEmail) => {
 
   transporter.sendMail(emailContent, function (err, info) {
 		if (err) {
-			console.log("Sending Email error:", error);
+			// console.log("Sending Email error:", error);
+      console.log('Sending Email error:');
 		} else {
 			console.log(`Successfully  send email to ${userEmail}...`);
 		}
