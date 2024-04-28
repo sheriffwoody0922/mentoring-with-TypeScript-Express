@@ -4,7 +4,7 @@ const paginatedResults = model => {
     const limit = parseInt(req.query.limit) || 20;
     const sort = {};
 
-    if (!req.query.sortBy && req.query.OrderBy) {
+    if (req.query.sortBy && req.query.OrderBy) {
       sort[req.query.sortBy] = req.query.OrderBy.toLowerCase() === 'desc' ? -1 : 1;
     } else {
       sort.createdAt = -1;
@@ -40,12 +40,23 @@ const paginatedResults = model => {
     results.totalPages = Math.ceil(totalCount / limit);
     results.lastPage = Math.ceil(totalCount / limit);
 
+    let filter = {};
+    if (req.query.filterBy && req.query.role) {
+      if (req.query.role.toLowerCase() === 'admin') {
+        filter.$or = [{ role: 'admin' }];
+      } else if (req.query.role.toLowerCase() === 'user') {
+        filter.$or = [{ role: 'user' }];
+      } else if (req.query.role.toLowerCase() === 'all') {
+        filter = {};
+      }
+    }
+
     try {
       results.results = await model
-        .find(query)
+        .find(filter)
         .select(' firstName lastName email dateOfBirth gender cart createdAt updatedAt 	role')
         .limit(limit)
-        .sort({ addedDate: -1 })
+        .sort(sort)
         .skip(startIndex)
         .exec();
 
