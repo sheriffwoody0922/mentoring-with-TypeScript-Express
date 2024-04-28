@@ -60,6 +60,17 @@ router.patch('/:userId', userValidation.userIdValidation(), authenticateToken, u
  * @apiSuccess (200) {Object} mixed `User` object
  */
 
-router.delete('/:userId', userValidation.userIdValidation(), userController.user_delete);
+router.delete('/:userId', userValidation.userIdValidation(), authenticateToken, userController.user_delete);
+
+/**
+ * @api {get}  /api/v1/users//me
+ * @apiName Get user data
+ * @apiPermission Protected
+ * @apiGroup User
+ *
+ * @apiSuccess (200) {Object} mixed `User` object
+ */
+
+router.get('/me', authenticateToken, userController.user_get_me);
 
 module.exports = router;
