@@ -1,8 +1,15 @@
 {
-  "extends": ["react-app", "prettier", "plugin:react/recommended"],
+  "extends": ["prettier"],
   "plugins": ["prettier"],
   "rules": {
     "prettier/prettier": "error",
     "react/no-unescaped-entities": 0
+  },
+  "parserOptions": {
+    "ecmaVersion": "latest"
+  },
+
+  "env": {
+    "es6": true
   }
 }

@@ -1,14 +1,14 @@
-const nodemailer = require("nodemailer");
-const sendGridTransport = require("nodemailer-sendgrid-transport");
+const nodemailer = require('nodemailer');
+const sendGridTransport = require('nodemailer-sendgrid-transport');
 
-const { SEND_GRID_API_KEY, ADMIN_SEND_GRID_EMAIL } = require("../configs/environment.config");
+const { SEND_GRID_API_KEY, ADMIN_SEND_GRID_EMAIL } = require('../configs/environment.config');
 
 const transporter = nodemailer.createTransport(
-	sendGridTransport({
-		auth: {
-			api_key: SEND_GRID_API_KEY,
-		},
-	}),
+  sendGridTransport({
+    auth: {
+      api_key: SEND_GRID_API_KEY
+    }
+  })
 );
 
 const htmlContent = ` <div style="max-width: 700px; margin:auto; border: 10px solid #ddd; padding: 50px 20px; font-size: 110%;">
@@ -30,23 +30,22 @@ const htmlContent = ` <div style="max-width: 700px; margin:auto; border: 10px so
         </div>
       </div>`;
 
-const sendEmail = (userEmail) => {
+const sendEmail = userEmail => {
   const emailContent = {
     from: ADMIN_SEND_GRID_EMAIL,
     to: userEmail,
-    subject: "Signup succeeded!",
-    html: htmlContent,
+    subject: 'Signup succeeded!',
+    html: htmlContent
   };
 
-  transporter.sendMail(emailContent, function (err, info) {
-		if (err) {
-			// console.log("Sending Email error:", error);
+  transporter.sendMail(emailContent, function(err, info) {
+    if (err) {
+      // console.log("Sending Email error:", error);
       console.log('Sending Email error:');
-		} else {
-			console.log(`Successfully  send email to ${userEmail}...`);
-		}
-	});
+    } else {
+      console.log(`Successfully  send email to ${userEmail}...`);
+    }
+  });
 };
 
 module.exports = sendEmail;
-      

@@ -6,7 +6,7 @@ const errorHandlerMiddleware = (error, req, res, next) => {
       success: false,
       error: true,
       message: error.message || 'Internal Server Error',
-      status:  error.status || 500
+      status: error.status || 500
     }
   });
 };

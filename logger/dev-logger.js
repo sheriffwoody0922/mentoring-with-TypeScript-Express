@@ -25,7 +25,7 @@ function buildDevLogger() {
         )
       }),
       // log in console
-      new winston.transports.Console(),
+      new winston.transports.Console()
 
       // Store in DB
       // new winston.transports.MongoDB({

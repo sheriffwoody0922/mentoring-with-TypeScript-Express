@@ -1,318 +1,279 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const { validationResult } = require('express-validator');
 
-const User = require("../models/users.model");
-const sendEmail = require("../utils/sendEmail");
+const User = require('../models/users.model');
+const sendEmail = require('../utils/sendEmail');
 
 // Handling Post Request to /api/v1/users/signup
 exports.user_signup = async (req, res) => {
-	const {
-		firstName,
-		lastName,
-		email,
-		password,
-		dateOfBirth,
-		gender,
-		cart,
-		confirmPassword,
-		role
-	} = req.body;
+  const { firstName, lastName, email, password, dateOfBirth, gender, cart, confirmPassword, role } = req.body;
 
-	const newUser = new User({
-		_id: new mongoose.Types.ObjectId(),
-		firstName,
-		lastName,
-		email,
-		password,
-		confirmPassword,
-		dateOfBirth,
-		gender,
-		cart,
-		role
-	});
-
-	const errors = validationResult(req);
-
-	if (!errors.isEmpty()) {
-		return res.status(422).send({
-			message: errors.array()[0].msg,
-			success: false,
-      status: 422,
-      oldInput: {
-				email: email,
-        password: password,
-			},
-			validationErrors: errors.array(),
-		});
-	}
-
-	try {
-		const user = await newUser.save();
-
-		// send back only the user and token (not password been send)
-		const token = user.createJWT();
-
-		res.status(201).send({
-			message: "Registered Successfully",
-			success: true,
-			status: 201,
-			user: {
-				_id: user._id,
-				firstName: user.firstName,
-				lastName: user.lastName,
-				email: user.email,
-				dateOfBirth: user.dateOfBirth,
-				gender: user.gender,
-				cart: user.cart,
-				createdAt: user?.createdAt,
-				updatedAt: user?.updatedAt,
-				role: user?.role,
-			},
-			token: token,
-		});
-
-		// send mail
-		// sendEmail(user?.email);
-	} catch (error) {
-		if (error?.code === 11000) {
-			// also we can send  422(422 Unprocessable Entity)
-			// 409 Conflict
-			return res.status(409).send({
-				success: false,
-				message: "Unable to save user to database",
-				status: 409,
-				error: `Email address ${newUser.email} is already taken`,
-			});
-		}
-
-		// 500 Internal Server Error
-		return res.status(500).send({
-			success: false,
-			message: "Unable to save to user to database",
-			status: 500,
-			error: error,
-		});
-	}
-};
-
-// Handling Post Request to /api/v1/users/login
-exports.user_login = async (req, res, next) => {
-	const { email, password } = req.body;
+  const newUser = new User({
+    _id: new mongoose.Types.ObjectId(),
+    firstName,
+    lastName,
+    email,
+    password,
+    confirmPassword,
+    dateOfBirth,
+    gender,
+    cart,
+    role
+  });
 
   const errors = validationResult(req);
 
-	if (!errors.isEmpty()) {
-		return res.status(422).send({
+  if (!errors.isEmpty()) {
+    return res.status(422).send({
       message: errors.array()[0].msg,
       success: false,
       status: 422,
       oldInput: {
         email: email,
-        password: password,
+        password: password
       },
-      validationErrors: errors.array(),
+      validationErrors: errors.array()
     });
-	}
+  }
 
-	try {
-		const user = await User.findOne({ email: email });
+  try {
+    const user = await newUser.save();
 
-		// 401 Unauthorized
-		if (!user) {
-			return res.status(401).send({
-				Status: "Auth Failed (Invalid Credentials)",
-				success: false,
-				status: 401,
-			});
-		}
+    // send back only the user and token (not password been send)
+    const token = user.createJWT();
 
-		// Compare password
-		const isPasswordCorrect = await user.comparePassword(password);
-		if (!isPasswordCorrect) {
-			return res.status(401).send({
-				Status: "Auth Failed (Invalid Credentials)",
-				success: false,
-				status: 401,
-			});
-		}
+    res.status(201).send({
+      message: 'Registered Successfully',
+      success: true,
+      status: 201,
+      user: {
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        dateOfBirth: user.dateOfBirth,
+        gender: user.gender,
+        cart: user.cart,
+        createdAt: user?.createdAt,
+        updatedAt: user?.updatedAt,
+        role: user?.role
+      },
+      token: token
+    });
 
-		// Send back only the user and token (dont send the password)
-		const token = user.createJWT();
+    // send mail
+    // sendEmail(user?.email);
+  } catch (error) {
+    if (error?.code === 11000) {
+      // also we can send  422(422 Unprocessable Entity)
+      // 409 Conflict
+      return res.status(409).send({
+        success: false,
+        message: 'Unable to save user to database',
+        status: 409,
+        error: `Email address ${newUser.email} is already taken`
+      });
+    }
 
-		return res.status(200).send({
-			message: "Auth successful",
-			success: true,
-			status: 200,
-			user: {
-				_id: user._id,
-				firstName: user.firstName,
-				lastName: user.lastName,
-				email: user.email,
-				dateOfBirth: user.dateOfBirth,
-				gender: user.gender,
-				joinedDate: user.joinedDate,
-			},
-			token: token,
-		});
-	} catch (error) {
-		// 500 Internal Server Error
-		return res.status(500).send({
-			message: "Internal Server Error(invalid id)",
-			success: false,
-			status: 401,
-			status: 500,
-			error: error,
-		});
-	}
+    // 500 Internal Server Error
+    return res.status(500).send({
+      success: false,
+      message: 'Unable to save to user to database',
+      status: 500,
+      error: error
+    });
+  }
+};
+
+// Handling Post Request to /api/v1/users/login
+exports.user_login = async (req, res, next) => {
+  const { email, password } = req.body;
+
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(422).send({
+      message: errors.array()[0].msg,
+      success: false,
+      status: 422,
+      oldInput: {
+        email: email,
+        password: password
+      },
+      validationErrors: errors.array()
+    });
+  }
+
+  try {
+    const user = await User.findOne({ email: email });
+
+    // 401 Unauthorized
+    if (!user) {
+      return res.status(401).send({
+        Status: 'Auth Failed (Invalid Credentials)',
+        success: false,
+        status: 401
+      });
+    }
+
+    // Compare password
+    const isPasswordCorrect = await user.comparePassword(password);
+    if (!isPasswordCorrect) {
+      return res.status(401).send({
+        Status: 'Auth Failed (Invalid Credentials)',
+        success: false,
+        status: 401
+      });
+    }
+
+    // Send back only the user and token (dont send the password)
+    const token = user.createJWT();
+
+    return res.status(200).send({
+      message: 'Auth successful',
+      success: true,
+      status: 200,
+      user: {
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        dateOfBirth: user.dateOfBirth,
+        gender: user.gender,
+        joinedDate: user.joinedDate
+      },
+      token: token
+    });
+  } catch (error) {
+    // 500 Internal Server Error
+    return res.status(500).send({
+      message: 'Internal Server Error(invalid id)',
+      success: false,
+      status: 401,
+      status: 500,
+      error: error
+    });
+  }
 };
 
 // Handling delete Request to /api/v1/users/userId
 exports.user_delete = async (req, res, next) => {
-	const toBeDeletedUser = await User.findByIdAndRemove({
-		_id: req.params.userId,
-	});
+  const toBeDeletedUser = await User.findByIdAndRemove({
+    _id: req.params.userId
+  });
 
-	if (!toBeDeletedUser) {
-		res.status(400).send({
-			success: false,
-			message: `Failed to delete user by given ID`,
-			status: 400,
-		});
-	}
+  if (!toBeDeletedUser) {
+    res.status(400).send({
+      success: false,
+      message: `Failed to delete user by given ID`,
+      status: 400
+    });
+  }
 
-	res.status(200).send({
-		message: "Successfully deleted user by given id",
-		success: true,
-		status: 200,
-	});
+  res.status(200).send({
+    message: 'Successfully deleted user by given id',
+    success: true,
+    status: 200
+  });
 };
 
 // Handling patch Request to /api/v1/users/userId
 exports.user_update = async (req, res, next) => {
-	const {
-		firstName,
-		lastName,
-		email,
-		password,
-		dateOfBirth,
-		gender,
-		cart,
-		confirmPassword,
-	} = req.body;
+  const { firstName, lastName, email, password, dateOfBirth, gender, cart, confirmPassword } = req.body;
 
-	const userId = req.params.userId;
+  const userId = req.params.userId;
 
-	User.findById(userId).then((user) => {
-		if (!user) {
-			return res.status(400).send({
-				success: false,
-				message: `Database Update Failure `,
-				status: 400,
-			});
-		}
+  User.findById(userId).then(user => {
+    if (!user) {
+      return res.status(400).send({
+        success: false,
+        message: `Database Update Failure `,
+        status: 400
+      });
+    }
 
-		user.firstName = firstName || user.firstName;
-		user.lastName = lastName || user.lastName;
-		user.email = email || user.email;
-		user.password = password || user.password;
-		user.confirmPassword = confirmPassword || user.confirmPassword;
-		user.gender = gender || user.gender;
-		user.dateOfBirth = dateOfBirth || user.dateOfBirth;
-		user.cart = cart || user.cart;
-		user
-		.save()
-		.then((updatedUser) => {
-			return res.status(200).send({
-				message: "Successfully updated user by given id",
-				success: true,
-				status: 201,
-				user: {
-					_id: updatedUser._id,
-					firstName: updatedUser.firstName,
-					lastName: updatedUser.lastName,
-					email: updatedUser.email,
-					dateOfBirth: updatedUser.dateOfBirth,
-					gender: updatedUser.gender,
-					cart: updatedUser.cart,
-					createdAt: updatedUser?.createdAt,
-					updatedAt: updatedUser?.updatedAt,
-				},
-			});
-		})
-		.catch((error) => {
-			if (error?.code === 11000) {
-				return res.status(409).send({
-					success: false,
-					message: "Unable to update user in database",
-					status: 409,
-					error: `Email address ${email} is already taken`,
-				});
-			}
+    user.firstName = firstName || user.firstName;
+    user.lastName = lastName || user.lastName;
+    user.email = email || user.email;
+    user.password = password || user.password;
+    user.confirmPassword = confirmPassword || user.confirmPassword;
+    user.gender = gender || user.gender;
+    user.dateOfBirth = dateOfBirth || user.dateOfBirth;
+    user.cart = cart || user.cart;
+    user
+      .save()
+      .then(updatedUser => {
+        return res.status(200).send({
+          message: 'Successfully updated user by given id',
+          success: true,
+          status: 201,
+          user: {
+            _id: updatedUser._id,
+            firstName: updatedUser.firstName,
+            lastName: updatedUser.lastName,
+            email: updatedUser.email,
+            dateOfBirth: updatedUser.dateOfBirth,
+            gender: updatedUser.gender,
+            cart: updatedUser.cart,
+            createdAt: updatedUser?.createdAt,
+            updatedAt: updatedUser?.updatedAt
+          }
+        });
+      })
+      .catch(error => {
+        if (error?.code === 11000) {
+          return res.status(409).send({
+            success: false,
+            message: 'Unable to update user in database',
+            status: 409,
+            error: `Email address ${email} is already taken`
+          });
+        }
 
-			// 500 Internal Server Error
-			return res.status(500).send({
-				success: false,
-				message: "Unable to update user in database",
-				status: 500,
-				error: error,
-			});
-		});
-	});
+        // 500 Internal Server Error
+        return res.status(500).send({
+          success: false,
+          message: 'Unable to update user in database',
+          status: 500,
+          error: error
+        });
+      });
+  });
 };
-
-
-
-
-
 
 // Handling Post Request to /api/v1/users/signup
 exports.user_signup_Script = async (req, res) => {
-	// program to generate random strings
+  // program to generate random strings
 
-	const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
-	function generateString(length) {
-		let result = ' ';
+  function generateString(length) {
+    let result = ' ';
     const charactersLength = characters.length;
-		for ( let i = 0; i < length; i++ ) {
-			result += characters.charAt(Math.floor(Math.random() * charactersLength));
-		}
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
 
-		return result;
-	}
+    return result;
+  }
 
-	for (let i = 0; i < 1000; i++) {
-		const newUser = new User({
-			_id: new mongoose.Types.ObjectId(),
-			firstName:"test",
-			lastName:"test",
-			email:`${generateString(5)}nh@gmail.com`,
-			password:"123456",
-			confirmPassword:"123456",
-			dateOfBirth:"02-12-1994",
-			gender:"male"
-		});
-	
-		try {
-			const user = await newUser.save();
-			console.log(i)
-		} catch (error) {
-			console.log("errrrrrr")
-		}
-	}
+  for (let i = 0; i < 1000; i++) {
+    const newUser = new User({
+      _id: new mongoose.Types.ObjectId(),
+      firstName: 'test',
+      lastName: 'test',
+      email: `${generateString(5)}nh@gmail.com`,
+      password: '123456',
+      confirmPassword: '123456',
+      dateOfBirth: '02-12-1994',
+      gender: 'male'
+    });
+
+    try {
+      const user = await newUser.save();
+      console.log(i);
+    } catch (error) {
+      console.log('errrrrrr');
+    }
+  }
 };
