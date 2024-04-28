@@ -1,7 +1,3 @@
-/** @format */
-
-const mongoose = require("mongoose");
-
 const User = require("../models/users.model");
 
 // Handling Get Request to /api/v1/admin/users
@@ -10,7 +6,7 @@ exports.admin_get_all_user = (req, res, next) => {
 		.select(
 			" firstName lastName email dateOfBirth gender cart createdAt updatedAt 	role",
 		)
-		.sort({ createdAt: -1 })
+		.sort({ role:'asc', createdAt: -1 })
 		.exec()
 		.then((users) => {
 			const responseObject = {
