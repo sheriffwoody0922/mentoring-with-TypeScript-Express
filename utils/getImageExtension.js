@@ -1,5 +1,3 @@
-/** @format */
-
 // Check Image Extension
 const getImageExtension = (mimetype) => {
 	switch (mimetype) {

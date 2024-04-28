@@ -1,4 +1,4 @@
-const { ADMIN_ROLE, ADMIN_EMAIL } = require('../../lib/config');
+const { ADMIN_ROLE, ADMIN_EMAIL } = require('../../configs/environment.config');
 const User = require('../../models/users.model');
 
 // Middleware function to check admin role
