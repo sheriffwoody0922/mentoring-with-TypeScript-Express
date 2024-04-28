@@ -17,6 +17,7 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
+    "colors": "^1.4.0",
     "connect-mongo": "^4.4.1",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",

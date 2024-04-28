@@ -3,6 +3,7 @@ const express = require('express');
 const expressAyncErrors = require('express-async-errors');
 const cors = require('cors');
 const morgan = require('morgan');
+const colors = require('colors');
 
 // Initialize app with express
 const app = express();
@@ -52,9 +53,12 @@ app.use(errorHandlerMiddleware);
 // Connecting to MongoDB and Starting Server
 const start = async () => {
   try {
-    await connectDB(MONGODB_CONNECTION_STRING);
-    console.log('MongoDB database connection established successfully ...');
-    app.listen(port, () => console.log(`Server is listening on port ${PORT}...`));
+    const conn = await connectDB(MONGODB_CONNECTION_STRING);
+
+    console.log(`MongoDB database connection established successfully to... ${conn?.connection?.host}`.cyan.underline);
+
+    app.listen(PORT, () => console.log(`Server is listening on port ${PORT}...`.inverse));
+
     // logger.error({
     //   message: `MongoDB database connection established successfully ...`,
     // });
